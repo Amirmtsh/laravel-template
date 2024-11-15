@@ -19,7 +19,7 @@ services:
     environment:
       TZ: "${TZ}"
     volumes:
-      - ./storage/redis:/data
+      - ./docker/storage/redis:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       retries: 3
@@ -37,7 +37,7 @@ services:
       PGPASSWORD: "${POSTGRES_PASSWORD:-secret}"
       TZ: "${TZ}"
     volumes:
-      - ./storage/postgres:/var/lib/postgresql/data
+      - ./docker/storage/postgres:/var/lib/postgresql/data
     healthcheck:
       test:
         [
@@ -62,7 +62,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
     volumes:
-      - ./storage/pgadmin:/var/lib/pgadmin
+      - ./docker/storage/pgadmin:/var/lib/pgadmin
     ports:
       - 5050:80
     user: root
