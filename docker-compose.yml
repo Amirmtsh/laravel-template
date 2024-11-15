@@ -1,0 +1,73 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: api
+    ports:
+      - "8000:80"
+    container_name: api
+    tty: true
+    volumes:
+      - ./storage:/app/storage
+  redis:
+    image: "${REDIS_IMAGE}"
+    container_name: "${REDIS_CONTAINER_NAME}"
+    hostname: "${REDIS_HOSTNAME}"
+    restart: always
+    command: redis-server --requirepass "${REDIS_PASSWORD}"
+    environment:
+      TZ: "${TZ}"
+    volumes:
+      - ./storage/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      retries: 3
+      timeout: 5s    
+    user: root
+
+  postgres:
+    image: "${POSTGRES_IMAGE}"
+    container_name: "${POSTGRES_CONTAINER_NAME}"
+    hostname: "${POSTGRES_HOSTNAME}"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: "${POSTGRES_DATABASE}"
+      PGPASSWORD: "${POSTGRES_PASSWORD:-secret}"
+      TZ: "${TZ}"
+    volumes:
+      - ./storage/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "${POSTGRES_DATABASE}",
+          "-U",
+          "${POSTGRES_USER}",
+        ]
+      retries: 3
+      timeout: 5s
+    user: root
+
+  pgadmin:
+    image: "${PGADMIN_IMAGE}"
+    container_name: "${PGADMIN_CONTAINER_NAME}"
+    hostname: "${PGADMIN_HOSTNAME}"
+    environment:
+      TZ: "${TZ}"
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    volumes:
+      - ./storage/pgadmin:/var/lib/pgadmin
+    ports:
+      - 5050:80
+    user: root
+
+networks:
+  default:
+    external: true
+    name: '${APP_DOCKER_NETWORK}'
