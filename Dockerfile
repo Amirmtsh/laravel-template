@@ -2,11 +2,11 @@ FROM webdevops/php-nginx:8.1
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 ENV WEB_DOCUMENT_ROOT /app/public
-ENV APP_ENV production
+
 WORKDIR /app
 COPY . .
 
-RUN composer install --no-interaction --optimize-autoloader --no-dev
+RUN composer install --no-interaction --optimize-autoloader
 
 COPY entrypoint.sh /opt/docker/provision/entrypoint.d/
 COPY supervosord-horizon.conf /opt/docker/etc/supervisor.d/
